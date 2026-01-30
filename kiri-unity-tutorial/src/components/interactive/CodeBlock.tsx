@@ -99,10 +99,12 @@ export function CodeBlock({
       {/* Code with line numbers and syntax highlighting */}
       <div className="overflow-x-auto">
         <Highlight
-          prism={Prism}
-          theme={themes.vsDark}
-          code={code}
-          language={lang as "csharp"}
+          {...({
+            prism: Prism,
+            theme: themes.vsDark,
+            code,
+            language: lang,
+          } as React.ComponentProps<typeof Highlight>)}
         >
           {({ className, style, tokens, getLineProps, getTokenProps }) => (
             <pre
