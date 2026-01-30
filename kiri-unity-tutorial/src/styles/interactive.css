@@ -1,0 +1,76 @@
+/* Interactive components: CSS variables and utility classes */
+
+:root {
+  /* Kiri moods (KiriTip, etc.) */
+  --kiri-happy: #10b981;
+  --kiri-thinking: #3b82f6;
+  --kiri-warning: #f59e0b;
+  --kiri-excited: #8b5cf6;
+  --kiri-confused: #6b7280;
+
+  /* Device preview */
+  --device-frame: #1f2937;
+  --device-screen: #374151;
+  --safe-area: #10b981;
+
+  /* Unity Inspector / code blocks */
+  --unity-dark: #282c34;
+  --unity-blue: #3b82f6;
+}
+
+/* Base style for interactive blocks (demos, cards, callouts) */
+.interactive-card {
+  border-radius: 0.75rem;
+  border: 1px solid rgb(229 231 235);
+  background-color: rgb(249 250 251 / 0.8);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.dark .interactive-card {
+  border-color: rgb(55 65 81);
+  background-color: rgb(31 41 55 / 0.5);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+}
+
+/* Device frame (DevicePreview, Layout2048 preview) */
+.device-frame {
+  background-color: var(--device-frame);
+  border: 2px solid rgb(75 85 99);
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+}
+
+.dark .device-frame {
+  border-color: rgb(55 65 81);
+}
+
+/* Unity Inspector–style panel (Inspector, CodeBlock, Callout type="unity") */
+.unity-inspector {
+  background-color: var(--unity-dark);
+  border: 1px solid rgb(55 65 81);
+  border-radius: 0.5rem;
+  color: rgb(209 213 219);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.unity-inspector .unity-inspector-header {
+  background-color: rgb(17 24 39);
+  border-bottom: 1px solid rgb(55 65 81);
+  color: rgb(156 163 175);
+  font-weight: 600;
+  padding: 0.375rem 0.5rem;
+}
+
+.unity-inspector .unity-inspector-accent {
+  color: var(--unity-blue);
+}
+
+.dark .unity-inspector {
+  border-color: rgb(75 85 99);
+}
+
+.dark .unity-inspector .unity-inspector-header {
+  background-color: rgb(3 7 18);
+  border-bottom-color: rgb(75 85 99);
+}
