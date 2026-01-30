@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component, type ReactNode } from "react";
 import { Highlight, themes } from "prism-react-renderer";
 import Prism from "prismjs";
 import "prismjs/components/prism-csharp";
@@ -8,6 +8,19 @@ import "prismjs/components/prism-typescript";
 import "prismjs/components/prism-json";
 import "prismjs/components/prism-bash";
 
+class HighlightErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
 
 const LANGUAGE_ICONS: Record<string, string> = {
   csharp: "C#",
@@ -36,15 +49,18 @@ function normalizeLanguage(lang: string): string {
   return lang;
 }
 
-export function CodeBlock({
-  language = "csharp",
-  title,
-  copyable = true,
-  children,
-}: CodeBlockProps) {
+export function CodeBlock(innerProps: CodeBlockProps) {
+  const props: CodeBlockProps =
+    innerProps != null && typeof innerProps === "object" ? innerProps : {};
+  const language = props.language ?? "csharp";
+  const title = props.title;
+  const copyable = props.copyable !== false;
+  const children = props.children;
   const [copied, setCopied] = useState(false);
-  const code = (typeof children === "string" ? children : String(children)).trim();
-  const lang = normalizeLanguage(language ?? "csharp");
+  const code = (typeof children === "string" ? children : (children != null ? String(children) : "")).trim();
+  const rawLang = typeof language === "string" ? language : "csharp";
+  const lang = normalizeLanguage(rawLang);
+  const safeLang = typeof Prism?.languages?.[lang] === "object" ? lang : "csharp";
   const displayTitle = title ?? `${lang}`;
   const icon = LANGUAGE_ICONS[lang] ?? lang;
 
@@ -98,49 +114,59 @@ export function CodeBlock({
 
       {/* Code with line numbers and syntax highlighting */}
       <div className="overflow-x-auto">
-        <Highlight
-          {...({
-            prism: Prism,
-            theme: themes.vsDark,
-            code,
-            language: lang,
-          } as React.ComponentProps<typeof Highlight>)}
-        >
-          {({ className, style, tokens, getLineProps, getTokenProps }) => (
-            <pre
-              className={`${className} m-0 p-4 text-sm leading-relaxed overflow-x-auto`}
-              style={{ ...style, background: "transparent", margin: 0 }}
-            >
-              <code className="block min-w-max">
-                {tokens.map((line, i) => {
-                  const lineProps = getLineProps({ line, key: i });
-                  const { key: _lineKey, ...restLineProps } = lineProps;
-                  return (
-                    <div
-                      key={i}
-                      {...restLineProps}
-                      className={`${restLineProps.className ?? ""} flex`}
-                    >
-                      <span
-                        className="pr-4 text-right select-none text-neutral-500 w-8 flex-shrink-0"
-                        aria-hidden
-                      >
-                        {i + 1}
-                      </span>
-                      <span className="flex-1 min-w-0">
-                        {line.map((token, key) => {
-                          const tokenProps = getTokenProps({ token, key }) ?? {};
-                          const { key: _tokenKey, ...restTokenProps } = tokenProps;
-                          return <span key={key} {...restTokenProps} />;
-                        })}
-                      </span>
-                    </div>
-                  );
-                })}
-              </code>
+        <HighlightErrorBoundary
+          fallback={
+            <pre className="m-0 p-4 text-sm leading-relaxed overflow-x-auto text-neutral-100">
+              <code className="block min-w-max">{code}</code>
             </pre>
-          )}
-        </Highlight>
+          }
+        >
+          <Highlight
+            {...({
+              prism: Prism,
+              theme: themes?.vsDark ?? {},
+              code,
+              language: safeLang,
+            } as React.ComponentProps<typeof Highlight>)}
+          >
+            {({ className, style, tokens, getLineProps, getTokenProps }) => (
+              <pre
+                className={`${className ?? ""} m-0 p-4 text-sm leading-relaxed overflow-x-auto`}
+                style={{ ...style, background: "transparent", margin: 0 }}
+              >
+                <code className="block min-w-max">
+                  {(Array.isArray(tokens) ? tokens : []).map((line, i) => {
+                    if (line == null) return <div key={i} className="flex" />;
+                    const lineProps = getLineProps({ line, key: i });
+                    const { key: _lineKey, ...restLineProps } = lineProps;
+                    return (
+                      <div
+                        key={i}
+                        {...restLineProps}
+                        className={`${restLineProps.className ?? ""} flex`}
+                      >
+                        <span
+                          className="pr-4 text-right select-none text-neutral-500 w-8 flex-shrink-0"
+                          aria-hidden
+                        >
+                          {i + 1}
+                        </span>
+                        <span className="flex-1 min-w-0">
+                          {(Array.isArray(line) ? line : []).map((token, key) => {
+                            if (token == null) return null;
+                            const tokenProps = getTokenProps({ token, key }) ?? {};
+                            const { key: _tokenKey, ...restTokenProps } = tokenProps;
+                            return <span key={key} {...restTokenProps} />;
+                          })}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </code>
+              </pre>
+            )}
+          </Highlight>
+        </HighlightErrorBoundary>
       </div>
     </div>
   );

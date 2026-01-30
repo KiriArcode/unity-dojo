@@ -14,12 +14,11 @@ interface CodeBlockPlaceholderProps {
  * the real CodeBlock (with Prism) to avoid loading prism-react-renderer on the
  * server and prevent "different React version" errors when using compileMDX.
  */
-export function CodeBlockPlaceholder({
-  language = "text",
-  title,
-  copyable = true,
-  children,
-}: CodeBlockPlaceholderProps) {
+export function CodeBlockPlaceholder(props: CodeBlockPlaceholderProps) {
+  const language = props?.language ?? "text";
+  const title = props?.title;
+  const copyable = props?.copyable !== false;
+  const children = props?.children;
   const [ClientCodeBlock, setClientCodeBlock] = useState<React.ComponentType<CodeBlockPlaceholderProps> | null>(null);
 
   useEffect(() => {
@@ -45,8 +44,12 @@ export function CodeBlockPlaceholder({
   }
 
   return (
-    <ClientCodeBlock language={language as "csharp"} title={title} copyable={copyable}>
-      {typeof children === "string" ? children : (children ? String(children) : "")}
+    <ClientCodeBlock
+      language={language ?? "csharp"}
+      title={title}
+      copyable={copyable}
+    >
+      {typeof children === "string" ? children : (children != null ? String(children) : "")}
     </ClientCodeBlock>
   );
 }
