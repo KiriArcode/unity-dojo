@@ -6,7 +6,7 @@ import { Callout } from "@/components/interactive/Callout";
 import { Quiz } from "@/components/interactive/Quiz";
 import { UnityInterface } from "@/components/interactive/UnityInterface";
 import { InteractiveDemo } from "@/components/interactive/InteractiveDemo";
-import { CodeBlock } from "@/components/interactive/CodeBlock";
+import { CodeBlock, type CodeBlockProps } from "@/components/interactive/CodeBlock";
 import { default as MatchSlider } from "@/components/interactive/demos/MatchSlider";
 import { default as CanvasScalerModes } from "@/components/interactive/demos/CanvasScalerModes";
 import { default as AnchorsVisualizer } from "@/components/interactive/demos/AnchorsVisualizer";
@@ -101,8 +101,23 @@ const defaultWrappers: MDXComponents = {
   ),
 };
 
+/** Wrapper so MDX never passes null/weird props into CodeBlock (fixes .language error). */
+function SafeCodeBlock(props: unknown) {
+  const p =
+    props != null && typeof props === "object" && !Array.isArray(props)
+      ? (props as Record<string, unknown>)
+      : {};
+  const safe: CodeBlockProps = {
+    language: typeof p.language === "string" ? p.language : "csharp",
+    title: p.title != null ? p.title : undefined,
+    copyable: p.copyable !== false,
+    children: p.children ?? "",
+  };
+  return <CodeBlock {...safe} />;
+}
+
 /**
- * MDX component map. CodeBlock is used directly (no Prism) to avoid .language null errors.
+ * MDX component map. CodeBlock wrapped in SafeCodeBlock to avoid .language null errors.
  */
 const interactiveComponents: MDXComponents = {
   KiriTip,
@@ -113,7 +128,7 @@ const interactiveComponents: MDXComponents = {
   Quiz,
   UnityInterface,
   InteractiveDemo,
-  CodeBlock,
+  CodeBlock: SafeCodeBlock,
   MatchSlider,
   CanvasScalerModes,
   AnchorsVisualizer,

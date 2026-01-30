@@ -24,7 +24,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: kiri-unity-tutorial/package-lock.json
       - run: npm ci
-      - run: npm run build
+      - name: Clean and build (no cache)
+        run: |
+          rm -rf .next out
+          npm run build
       - name: Verify build output structure
         continue-on-error: true
         run: |
