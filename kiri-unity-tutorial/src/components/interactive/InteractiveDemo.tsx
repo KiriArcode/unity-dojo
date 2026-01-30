@@ -43,7 +43,12 @@ class DemoErrorBoundary extends Component<
   state = { hasError: false, error: null as Error | null };
 
   static getDerivedStateFromError(error: Error) {
+    console.error("[InteractiveDemo] ErrorBoundary caught error:", error);
     return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("[InteractiveDemo] ErrorBoundary details:", error, errorInfo);
   }
 
   render() {
@@ -67,7 +72,12 @@ function DemoLoader({
       <DemoErrorFallback message={`Демо «${componentName}» не найдено. Доступны: ${Object.keys(DEMO_COMPONENTS).join(", ")}.`} />
     );
   }
-  const LazyComponent = lazy(loader);
+  const LazyComponent = lazy(() => {
+    return loader().catch((err) => {
+      console.error(`[InteractiveDemo] Failed to load ${componentName}:`, err);
+      throw err;
+    });
+  });
   return <LazyComponent {...props} />;
 }
 

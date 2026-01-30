@@ -52,7 +52,7 @@ const defaultWrappers: MDXComponents = {
   img: ({ src, alt }) => (
     <img
       src={src}
-      alt={alt}
+      alt={alt || ""}
       className="my-6 rounded-lg border border-neutral-200 dark:border-neutral-700 max-w-full h-auto"
     />
   ),
