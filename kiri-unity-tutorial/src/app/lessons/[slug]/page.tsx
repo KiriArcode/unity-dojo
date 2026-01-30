@@ -43,10 +43,10 @@ export default async function LessonPage({
   } catch (err) {
     console.error("[LessonPage] serialize error", lesson.slug, err);
     return (
-      <article className="max-w-3xl mx-auto prose dark:prose-invert prose-lg">
-        <h1>{lesson.title}</h1>
+      <article className="max-w-3xl mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-4">{lesson.title}</h1>
         {lesson.description && (
-          <p className="lead text-neutral-600 dark:text-neutral-400">
+          <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-6">
             {lesson.description}
           </p>
         )}
@@ -63,10 +63,10 @@ export default async function LessonPage({
   }
 
   return (
-    <article className="max-w-3xl mx-auto prose dark:prose-invert prose-lg">
-      <h1>{lesson.title}</h1>
+    <article className="max-w-3xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-4 text-neutral-900 dark:text-neutral-100">{lesson.title}</h1>
       {lesson.description && (
-        <p className="lead text-neutral-600 dark:text-neutral-400">
+        <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-6">
           {lesson.description}
         </p>
       )}

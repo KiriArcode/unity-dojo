@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useCallback, useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { BASE_PATH } from "@/lib/constants";
 
 const STORAGE_PREFIX = "kiri-lesson-";
 
@@ -17,9 +18,6 @@ function useStepByStep() {
   const ctx = useContext(StepByStepContext);
   return ctx;
 }
-
-// basePath для статики (совпадает с next.config.mjs)
-const basePath = "/unity-dojo";
 
 interface StepByStepProps {
   title: string;
@@ -98,7 +96,7 @@ export function Step({ number, children, screenshot, video, completed: completed
     if (expanded && overlayRef.current) overlayRef.current.focus();
   }, [expanded]);
 
-  const screenshotSrc = screenshot?.startsWith("/") ? `${basePath}${screenshot}` : screenshot;
+  const screenshotSrc = screenshot?.startsWith("/") ? `${BASE_PATH}${screenshot}` : screenshot;
 
   const ref = useRef<HTMLLIElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px 0px -40px 0px" });

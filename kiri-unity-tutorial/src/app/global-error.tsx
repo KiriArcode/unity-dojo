@@ -1,5 +1,7 @@
 "use client";
 
+import { BASE_PATH } from "@/lib/constants";
+
 export default function GlobalError({
   error,
   reset,
@@ -37,7 +39,7 @@ export default function GlobalError({
         </div>
         <p className="mt-6 text-xs text-neutral-500 dark:text-neutral-400 text-center">
           Откройте приложение по адресу{" "}
-          <a href="/unity-dojo/" className="underline">/unity-dojo/</a>
+          <a href={`${BASE_PATH}/`} className="underline">{BASE_PATH}/</a>
         </p>
       </body>
     </html>

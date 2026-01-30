@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import type { GrayMatterFile } from "gray-matter";
 import type { Lesson, LessonMeta } from "@/types/lesson";
 
 const CONTENT_DIR = path.join(process.cwd(), "src", "content", "lessons");
@@ -11,31 +12,46 @@ function getContentDir(lang: string): string {
   return path.join(CONTENT_DIR, lang);
 }
 
+interface ParsedMDX {
+  file: string;
+  fileSlug: string;
+  fileNameSlug: string;
+  data: GrayMatterFile<string>["data"];
+  content: string;
+}
+
+/** Read and parse all MDX files in a language directory. */
+function readMDXFiles(lang: string): ParsedMDX[] {
+  const dir = getContentDir(lang);
+  if (!fs.existsSync(dir)) return [];
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".mdx"));
+  return files.map((file) => {
+    const fullPath = path.join(dir, file);
+    const raw = fs.readFileSync(fullPath, "utf-8");
+    const { data, content } = matter(raw);
+    const fileSlug = (data.slug as string) || path.basename(file, ".mdx");
+    const fileNameSlug = path.basename(file, ".mdx");
+    return { file, fileSlug, fileNameSlug, data, content };
+  });
+}
+
 export function getLessons(lang: string): LessonMeta[] {
   const dir = getContentDir(lang);
   if (LOG) {
     console.log("[lessons] getLessons", { lang, dir, exists: fs.existsSync(dir) });
   }
-  if (!fs.existsSync(dir)) return [];
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".mdx"));
-  if (LOG) console.log("[lessons] files found", files);
-  const lessons: LessonMeta[] = [];
-  for (const file of files) {
-    const fullPath = path.join(dir, file);
-    const raw = fs.readFileSync(fullPath, "utf-8");
-    const { data } = matter(raw);
-    const slug = (data.slug as string) || path.basename(file, ".mdx");
-    lessons.push({
-      title: (data.title as string) || slug,
-      slug,
-      order: data.order,
-      category: data.category,
-      difficulty: data.difficulty,
-      duration: data.duration,
-      description: data.description,
-      tags: data.tags,
-    });
-  }
+  const parsed = readMDXFiles(lang);
+  if (LOG) console.log("[lessons] files found", parsed.map((p) => p.file));
+  const lessons: LessonMeta[] = parsed.map(({ fileSlug, data }) => ({
+    title: (data.title as string) || fileSlug,
+    slug: fileSlug,
+    order: data.order,
+    category: data.category,
+    difficulty: data.difficulty,
+    duration: data.duration,
+    description: data.description,
+    tags: data.tags,
+  }));
   lessons.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
   if (LOG) console.log("[lessons] getLessons result", lessons.map((l) => ({ slug: l.slug, title: l.title })));
   return lessons;
@@ -44,14 +60,8 @@ export function getLessons(lang: string): LessonMeta[] {
 export function getLessonBySlug(lang: string, slug: string): Lesson | null {
   const dir = getContentDir(lang);
   if (LOG) console.log("[lessons] getLessonBySlug", { lang, slug, dir, exists: fs.existsSync(dir) });
-  if (!fs.existsSync(dir)) return null;
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".mdx"));
-  for (const file of files) {
-    const fullPath = path.join(dir, file);
-    const raw = fs.readFileSync(fullPath, "utf-8");
-    const { data, content } = matter(raw);
-    const fileSlug = (data.slug as string) || path.basename(file, ".mdx");
-    const fileNameSlug = path.basename(file, ".mdx");
+  const parsed = readMDXFiles(lang);
+  for (const { file, fileSlug, fileNameSlug, data, content } of parsed) {
     if (LOG) console.log("[lessons] check file", { file, fileSlug, fileNameSlug, contentLength: content?.length ?? 0 });
     if (fileSlug === slug || fileNameSlug === slug) {
       if (LOG) {
@@ -81,16 +91,9 @@ export function getLessonBySlug(lang: string, slug: string): Lesson | null {
 
 /** All slug values for static export: frontmatter slug + filename slug per file. */
 export function getAllSlugs(lang: string): string[] {
-  const dir = getContentDir(lang);
-  if (!fs.existsSync(dir)) return [];
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".mdx"));
+  const parsed = readMDXFiles(lang);
   const slugs = new Set<string>();
-  for (const file of files) {
-    const fullPath = path.join(dir, file);
-    const raw = fs.readFileSync(fullPath, "utf-8");
-    const { data } = matter(raw);
-    const fileSlug = (data.slug as string) || path.basename(file, ".mdx");
-    const fileNameSlug = path.basename(file, ".mdx");
+  for (const { fileSlug, fileNameSlug } of parsed) {
     slugs.add(fileSlug);
     slugs.add(fileNameSlug);
   }

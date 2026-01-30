@@ -238,7 +238,7 @@ function HierarchyTree({
               selectedId={selectedId}
               hoveredId={hoveredId}
               highlightOnHover={highlightOnHover}
-              interactive={interactive ?? false}
+              interactive={interactive}
               onSelect={onSelect}
               onHover={onHover}
               expandedIds={expandedIds}
@@ -375,8 +375,8 @@ export default function Layout2048({
           depth={0}
           selectedId={selectedId}
           hoveredId={hoveredId}
-          highlightOnHover={highlightOnHover ?? true}
-          interactive={interactive ?? true}
+          highlightOnHover={highlightOnHover}
+          interactive={interactive}
           onSelect={setSelectedId}
           onHover={setHoveredId}
           expandedIds={expandedIds}
