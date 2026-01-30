@@ -25,6 +25,21 @@ jobs:
           cache-dependency-path: kiri-unity-tutorial/package-lock.json
       - run: npm ci
       - run: npm run build
+      - name: Reorganize build output for GitHub Pages
+        run: |
+          # Next.js экспортирует в out/, но нам нужно out/unity-dojo/
+          # Сохраняем текущий index.html (если есть) для редиректа
+          if [ -f "out/index.html" ]; then
+            mv out/index.html out/index.html.backup
+          fi
+          # Создаем директорию unity-dojo и перемещаем туда все файлы
+          mkdir -p out/unity-dojo
+          # Перемещаем все файлы и папки кроме unity-dojo (если уже существует)
+          find out -maxdepth 1 -mindepth 1 ! -name 'unity-dojo' ! -name 'index.html.backup' -exec mv {} out/unity-dojo/ \;
+          # Восстанавливаем index.html если был
+          if [ -f "out/index.html.backup" ]; then
+            mv out/index.html.backup out/index.html
+          fi
       - name: Add root redirect for GitHub Pages
         run: |
           cat > out/index.html << 'EOF'
