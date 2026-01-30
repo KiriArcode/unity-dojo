@@ -28,18 +28,11 @@ jobs:
       - name: Reorganize build output for GitHub Pages
         run: |
           # Next.js экспортирует в out/, но нам нужно out/unity-dojo/
-          # Сохраняем текущий index.html (если есть) для редиректа
-          if [ -f "out/index.html" ]; then
-            mv out/index.html out/index.html.backup
-          fi
-          # Создаем директорию unity-dojo и перемещаем туда все файлы
+          # Создаем директорию unity-dojo и перемещаем туда все файлы включая index.html
           mkdir -p out/unity-dojo
-          # Перемещаем все файлы и папки кроме unity-dojo (если уже существует)
-          find out -maxdepth 1 -mindepth 1 ! -name 'unity-dojo' ! -name 'index.html.backup' -exec mv {} out/unity-dojo/ \;
-          # Восстанавливаем index.html если был
-          if [ -f "out/index.html.backup" ]; then
-            mv out/index.html.backup out/index.html
-          fi
+          # Перемещаем все файлы и папки из out/ в out/unity-dojo/
+          # Используем find чтобы исключить саму директорию unity-dojo
+          find out -maxdepth 1 -mindepth 1 ! -name 'unity-dojo' -exec mv {} out/unity-dojo/ \;
       - name: Add root redirect for GitHub Pages
         run: |
           cat > out/index.html << 'EOF'
