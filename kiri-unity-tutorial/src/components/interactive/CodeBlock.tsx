@@ -99,7 +99,7 @@ export function CodeBlock({
       {/* Code with line numbers and syntax highlighting */}
       <div className="overflow-x-auto">
         <Highlight
-          Prism={Prism}
+          prism={Prism}
           theme={themes.vsDark}
           code={code}
           language={lang as "csharp"}
