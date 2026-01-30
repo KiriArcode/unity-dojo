@@ -6,7 +6,7 @@ import { Callout } from "@/components/interactive/Callout";
 import { Quiz } from "@/components/interactive/Quiz";
 import { UnityInterface } from "@/components/interactive/UnityInterface";
 import { InteractiveDemo } from "@/components/interactive/InteractiveDemo";
-import { CodeBlockPlaceholder } from "@/components/mdx/CodeBlockPlaceholder";
+import { CodeBlock } from "@/components/interactive/CodeBlock";
 import { default as MatchSlider } from "@/components/interactive/demos/MatchSlider";
 import { default as CanvasScalerModes } from "@/components/interactive/demos/CanvasScalerModes";
 import { default as AnchorsVisualizer } from "@/components/interactive/demos/AnchorsVisualizer";
@@ -102,9 +102,7 @@ const defaultWrappers: MDXComponents = {
 };
 
 /**
- * MDX component map that avoids loading prism-react-renderer on the server
- * (CodeBlock is replaced by CodeBlockPlaceholder which dynamic-imports it on the client).
- * This prevents "A React Element from an older version of React" when using compileMDX.
+ * MDX component map. CodeBlock is used directly (no Prism) to avoid .language null errors.
  */
 const interactiveComponents: MDXComponents = {
   KiriTip,
@@ -115,7 +113,7 @@ const interactiveComponents: MDXComponents = {
   Quiz,
   UnityInterface,
   InteractiveDemo,
-  CodeBlock: CodeBlockPlaceholder,
+  CodeBlock,
   MatchSlider,
   CanvasScalerModes,
   AnchorsVisualizer,
