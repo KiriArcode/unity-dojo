@@ -23,7 +23,7 @@ export function CodeBlockPlaceholder({
   const [ClientCodeBlock, setClientCodeBlock] = useState<React.ComponentType<CodeBlockPlaceholderProps> | null>(null);
 
   useEffect(() => {
-    import("@/components/interactive/CodeBlock").then((m) => setClientCodeBlock(() => m.CodeBlock));
+    import("@/components/interactive/CodeBlock").then((m) => setClientCodeBlock(m.CodeBlock));
   }, []);
 
   if (!ClientCodeBlock) {
