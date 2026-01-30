@@ -32,16 +32,13 @@ jobs:
           ls -la out/ | head -20
           echo ""
           # Next.js экспортирует в out/, но нам нужно out/unity-dojo/
-          # Создаем директорию unity-dojo
-          mkdir -p out/unity-dojo
-          # Перемещаем все файлы и папки из out/ в out/unity-dojo/
-          # Используем более надежный способ - перемещаем по одному
-          for item in out/*; do
-            if [ -e "$item" ] && [ "$(basename "$item")" != "unity-dojo" ]; then
-              echo "Moving: $item -> out/unity-dojo/"
-              mv "$item" out/unity-dojo/
-            fi
-          done
+          # Создаем временную директорию для перемещения
+          mkdir -p out/unity-dojo-temp
+          # Перемещаем ВСЕ файлы и папки из out/ в временную директорию
+          # Используем find чтобы избежать проблем с циклом for
+          find out -maxdepth 1 -mindepth 1 ! -name 'unity-dojo-temp' -exec mv {} out/unity-dojo-temp/ \;
+          # Переименовываем временную директорию в unity-dojo
+          mv out/unity-dojo-temp out/unity-dojo
           echo ""
           echo "=== Files in out/unity-dojo/ after reorganization ==="
           ls -la out/unity-dojo/ | head -20
@@ -49,15 +46,15 @@ jobs:
           echo "=== Checking for index.html in unity-dojo/ ==="
           if [ -f "out/unity-dojo/index.html" ]; then
             echo "✓ index.html found in unity-dojo/"
+            echo "First few lines:"
+            head -3 out/unity-dojo/index.html
           else
-            echo "✗ index.html NOT found in unity-dojo/ - listing all HTML files:"
+            echo "✗ index.html NOT found in unity-dojo/"
+            echo "All HTML files:"
             find out/unity-dojo -name "*.html" -type f
             echo ""
-            echo "Creating index.html from index.txt if exists..."
-            if [ -f "out/unity-dojo/index.txt" ]; then
-              mv out/unity-dojo/index.txt out/unity-dojo/index.html
-              echo "✓ Created index.html from index.txt"
-            fi
+            echo "All files in unity-dojo/:"
+            ls -la out/unity-dojo/
           fi
       - name: Add root redirect for GitHub Pages
         run: |
