@@ -89,31 +89,51 @@ jobs:
           EOF
       - name: Verify build output structure
         run: |
-          echo "=== Build output structure ==="
+          echo "=== Final build output structure ==="
+          echo "Root out/ directory:"
           ls -la out/ | head -20
           echo ""
           echo "=== Checking for unity-dojo directory ==="
           if [ -d "out/unity-dojo" ]; then
             echo "✓ unity-dojo directory exists"
-            ls -la out/unity-dojo/ | head -10
+            echo "Contents:"
+            ls -la out/unity-dojo/ | head -15
+            echo ""
+            echo "Checking _next directory:"
+            if [ -d "out/unity-dojo/_next" ]; then
+              echo "✓ _next directory exists"
+              find out/unity-dojo/_next -type f | head -5
+            else
+              echo "✗ _next directory NOT found!"
+            fi
           else
             echo "✗ unity-dojo directory NOT found!"
+            echo "Available directories:"
+            find out -type d -maxdepth 1
             exit 1
           fi
           echo ""
           echo "=== Checking for index.html files ==="
           if [ -f "out/index.html" ]; then
-            echo "✓ Root index.html exists"
+            echo "✓ Root index.html exists ($(wc -c < out/index.html) bytes)"
           else
             echo "✗ Root index.html NOT found!"
             exit 1
           fi
           if [ -f "out/unity-dojo/index.html" ]; then
-            echo "✓ unity-dojo/index.html exists"
+            echo "✓ unity-dojo/index.html exists ($(wc -c < out/unity-dojo/index.html) bytes)"
+            echo "First 5 lines:"
+            head -5 out/unity-dojo/index.html
           else
             echo "✗ unity-dojo/index.html NOT found!"
+            echo "HTML files in unity-dojo/:"
+            find out/unity-dojo -name "*.html" -type f
             exit 1
           fi
+          echo ""
+          echo "=== Summary ==="
+          echo "Total files in out/: $(find out -type f | wc -l)"
+          echo "Total files in out/unity-dojo/: $(find out/unity-dojo -type f | wc -l)"
       - uses: actions/upload-pages-artifact@v4
         with:
           path: kiri-unity-tutorial/out
