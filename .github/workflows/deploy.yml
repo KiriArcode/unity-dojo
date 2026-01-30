@@ -24,6 +24,9 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npm run build
+      - name: Add root redirect for GitHub Pages
+        run: |
+          echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/unity-dojo/"><link rel="canonical" href="/unity-dojo/"></head><body>Redirecting to <a href="/unity-dojo/">Kiri Unity Tutorial</a>...</body></html>' > out/index.html
       - uses: actions/upload-pages-artifact@v4
         with:
           path: kiri-unity-tutorial/out
