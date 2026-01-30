@@ -56,6 +56,33 @@ jobs:
           </body>
           </html>
           EOF
+      - name: Verify build output structure
+        run: |
+          echo "=== Build output structure ==="
+          ls -la out/ | head -20
+          echo ""
+          echo "=== Checking for unity-dojo directory ==="
+          if [ -d "out/unity-dojo" ]; then
+            echo "✓ unity-dojo directory exists"
+            ls -la out/unity-dojo/ | head -10
+          else
+            echo "✗ unity-dojo directory NOT found!"
+            exit 1
+          fi
+          echo ""
+          echo "=== Checking for index.html files ==="
+          if [ -f "out/index.html" ]; then
+            echo "✓ Root index.html exists"
+          else
+            echo "✗ Root index.html NOT found!"
+            exit 1
+          fi
+          if [ -f "out/unity-dojo/index.html" ]; then
+            echo "✓ unity-dojo/index.html exists"
+          else
+            echo "✗ unity-dojo/index.html NOT found!"
+            exit 1
+          fi
       - uses: actions/upload-pages-artifact@v4
         with:
           path: kiri-unity-tutorial/out
