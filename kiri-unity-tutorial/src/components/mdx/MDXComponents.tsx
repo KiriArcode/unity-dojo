@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { MDXComponents } from "mdx/types";
 import { KiriTip } from "@/components/interactive/KiriTip";
 import { StepByStep, Step } from "@/components/interactive/StepByStep";
@@ -109,9 +110,9 @@ function SafeCodeBlock(props: unknown) {
       : {};
   const safe: CodeBlockProps = {
     language: typeof p.language === "string" ? p.language : "csharp",
-    title: p.title != null ? p.title : undefined,
+    title: typeof p.title === "string" ? p.title : undefined,
     copyable: p.copyable !== false,
-    children: p.children ?? "",
+    children: (p.children ?? "") as ReactNode,
   };
   return <CodeBlock {...safe} />;
 }

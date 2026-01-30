@@ -28,8 +28,9 @@ function normalizeLanguage(lang: string): string {
 }
 
 export function CodeBlock(innerProps: CodeBlockProps) {
-  const props: CodeBlockProps =
-    innerProps != null && typeof innerProps === "object" ? innerProps : {};
+  const props = (innerProps != null && typeof innerProps === "object"
+    ? innerProps
+    : {}) as CodeBlockProps;
   const language = props.language ?? "csharp";
   const title = props.title;
   const copyable = props.copyable !== false;
