@@ -27,7 +27,35 @@ jobs:
       - run: npm run build
       - name: Add root redirect for GitHub Pages
         run: |
-          echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/unity-dojo/"><link rel="canonical" href="/unity-dojo/"></head><body>Redirecting to <a href="/unity-dojo/">Kiri Unity Tutorial</a>...</body></html>' > out/index.html
+          cat > out/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Kiri Unity Tutorial</title>
+            <meta http-equiv="refresh" content="0;url=/unity-dojo/">
+            <link rel="canonical" href="/unity-dojo/">
+            <script>
+              // JavaScript fallback для редиректа
+              (function() {
+                var target = '/unity-dojo/';
+                if (window.location.pathname === '/' || window.location.pathname === '/unity-dojo') {
+                  window.location.replace(target);
+                }
+              })();
+            </script>
+          </head>
+          <body>
+            <div style="font-family: system-ui, sans-serif; text-align: center; padding: 2rem;">
+              <p>Redirecting to <a href="/unity-dojo/">Kiri Unity Tutorial</a>...</p>
+              <p style="font-size: 0.875rem; color: #666; margin-top: 1rem;">
+                If you are not redirected automatically, <a href="/unity-dojo/">click here</a>.
+              </p>
+            </div>
+          </body>
+          </html>
+          EOF
       - uses: actions/upload-pages-artifact@v4
         with:
           path: kiri-unity-tutorial/out
