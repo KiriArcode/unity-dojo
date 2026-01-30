@@ -31,30 +31,43 @@ jobs:
           echo "=== Files in out/ before reorganization ==="
           ls -la out/ | head -20
           echo ""
+          echo "=== All HTML files before reorganization ==="
+          find out -maxdepth 1 -name "*.html" -type f 2>/dev/null | while read f; do echo "  $f ($(wc -c < "$f" 2>/dev/null || echo 0) bytes)"; done
+          # Резервная копия index.html на случай, если не попадёт в unity-dojo/
+          cp out/index.html /tmp/out-index-backup.html 2>/dev/null || true
           # Next.js экспортирует в out/, но нам нужно out/unity-dojo/
-          # Создаем временную директорию для перемещения
+          # Надёжный перенос: dotglob + цикл, чтобы не перемещать temp в себя
+          shopt -s dotglob
           mkdir -p out/unity-dojo-temp
-          # Перемещаем ВСЕ файлы и папки из out/ в временную директорию
-          # Используем find чтобы избежать проблем с циклом for
-          find out -maxdepth 1 -mindepth 1 ! -name 'unity-dojo-temp' -exec mv {} out/unity-dojo-temp/ \;
-          # Переименовываем временную директорию в unity-dojo
+          for item in out/*; do
+            [ "$(basename "$item")" = "unity-dojo-temp" ] && continue
+            [ -e "$item" ] || continue
+            mv "$item" out/unity-dojo-temp/
+          done
           mv out/unity-dojo-temp out/unity-dojo
           echo ""
           echo "=== Files in out/unity-dojo/ after reorganization ==="
           ls -la out/unity-dojo/ | head -20
           echo ""
-          echo "=== Checking for index.html in unity-dojo/ ==="
+          echo "=== All HTML files after reorganization ==="
+          find out/unity-dojo -name "*.html" -type f 2>/dev/null | while read f; do echo "  $f ($(wc -c < "$f" 2>/dev/null || echo 0) bytes)"; done
+          echo ""
+          echo "=== Ensure index.html in unity-dojo/ ==="
           if [ -f "out/unity-dojo/index.html" ]; then
             echo "✓ index.html found in unity-dojo/"
-            echo "First few lines:"
-            head -3 out/unity-dojo/index.html
+            echo "  Size: $(wc -c < out/unity-dojo/index.html) bytes"
+            head -5 out/unity-dojo/index.html
+            echo "  Paths check (should contain /unity-dojo/_next/):"
+            grep -o '/unity-dojo/_next/[^"]*' out/unity-dojo/index.html 2>/dev/null | head -3 || echo "  (none or not found)"
           else
-            echo "✗ index.html NOT found in unity-dojo/"
-            echo "All HTML files:"
-            find out/unity-dojo -name "*.html" -type f
-            echo ""
-            echo "All files in unity-dojo/:"
-            ls -la out/unity-dojo/
+            echo "✗ index.html missing, restoring from backup or creating fallback"
+            if [ -f /tmp/out-index-backup.html ]; then
+              cp /tmp/out-index-backup.html out/unity-dojo/index.html
+              echo "✓ Restored from backup"
+            else
+              echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/unity-dojo/"></head><body>Redirecting to <a href="/unity-dojo/">Kiri Unity Tutorial</a>...</body></html>' > out/unity-dojo/index.html
+              echo "✓ Created minimal fallback index.html"
+            fi
           fi
       - name: Add root redirect for GitHub Pages
         run: |
@@ -68,11 +81,12 @@ jobs:
             <meta http-equiv="refresh" content="0;url=/unity-dojo/">
             <link rel="canonical" href="/unity-dojo/">
             <script>
-              // JavaScript fallback для редиректа
               (function() {
-                var target = '/unity-dojo/';
-                if (window.location.pathname === '/' || window.location.pathname === '/unity-dojo') {
-                  window.location.replace(target);
+                var path = window.location.pathname.replace(/\/$/, '') || '/';
+                if (path === '/' || path === '/unity-dojo') {
+                  var base = window.location.origin || '';
+                  var target = base + '/unity-dojo/';
+                  try { window.location.replace(target); } catch (e) { window.location.href = target; }
                 }
               })();
             </script>
@@ -133,7 +147,21 @@ jobs:
           echo "Total files in out/: $(find out -type f 2>/dev/null | wc -l)"
           echo "Total files in out/unity-dojo/: $(find out/unity-dojo -type f 2>/dev/null | wc -l)"
           echo ""
+          echo "=== Paths in unity-dojo/index.html (should be /unity-dojo/_next/...) ==="
+          grep -oE 'href="[^"]*"|src="[^"]*"' out/unity-dojo/index.html 2>/dev/null | head -10 || echo "(none)"
+          echo ""
           echo "⚠️  Note: This step continues even if checks fail to allow deployment"
+      - name: Verify structure before upload
+        run: |
+          set -e
+          MISS=0
+          if [ ! -f "out/index.html" ]; then echo "✗ out/index.html (redirect) missing"; MISS=1; fi
+          if [ ! -f "out/unity-dojo/index.html" ]; then echo "✗ out/unity-dojo/index.html missing"; MISS=1; fi
+          if [ ! -d "out/unity-dojo/_next" ]; then echo "✗ out/unity-dojo/_next/ missing"; MISS=1; fi
+          if [ "$MISS" -ne 0 ]; then echo "Structure check failed. Fix build/reorganize step."; exit 1; fi
+          echo "✓ out/index.html exists"
+          echo "✓ out/unity-dojo/index.html exists"
+          echo "✓ out/unity-dojo/_next/ exists"
       - uses: actions/upload-pages-artifact@v4
         with:
           path: kiri-unity-tutorial/out
