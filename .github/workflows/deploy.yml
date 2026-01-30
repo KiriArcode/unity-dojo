@@ -27,12 +27,38 @@ jobs:
       - run: npm run build
       - name: Reorganize build output for GitHub Pages
         run: |
+          # Диагностика: что находится в out/ до перемещения
+          echo "=== Files in out/ before reorganization ==="
+          ls -la out/ | head -20
+          echo ""
           # Next.js экспортирует в out/, но нам нужно out/unity-dojo/
-          # Создаем директорию unity-dojo и перемещаем туда все файлы включая index.html
+          # Создаем директорию unity-dojo
           mkdir -p out/unity-dojo
           # Перемещаем все файлы и папки из out/ в out/unity-dojo/
-          # Используем find чтобы исключить саму директорию unity-dojo
-          find out -maxdepth 1 -mindepth 1 ! -name 'unity-dojo' -exec mv {} out/unity-dojo/ \;
+          # Используем более надежный способ - перемещаем по одному
+          for item in out/*; do
+            if [ -e "$item" ] && [ "$(basename "$item")" != "unity-dojo" ]; then
+              echo "Moving: $item -> out/unity-dojo/"
+              mv "$item" out/unity-dojo/
+            fi
+          done
+          echo ""
+          echo "=== Files in out/unity-dojo/ after reorganization ==="
+          ls -la out/unity-dojo/ | head -20
+          echo ""
+          echo "=== Checking for index.html in unity-dojo/ ==="
+          if [ -f "out/unity-dojo/index.html" ]; then
+            echo "✓ index.html found in unity-dojo/"
+          else
+            echo "✗ index.html NOT found in unity-dojo/ - listing all HTML files:"
+            find out/unity-dojo -name "*.html" -type f
+            echo ""
+            echo "Creating index.html from index.txt if exists..."
+            if [ -f "out/unity-dojo/index.txt" ]; then
+              mv out/unity-dojo/index.txt out/unity-dojo/index.html
+              echo "✓ Created index.html from index.txt"
+            fi
+          fi
       - name: Add root redirect for GitHub Pages
         run: |
           cat > out/index.html << 'EOF'
