@@ -3,15 +3,37 @@
 import { Suspense, lazy, Component, type ReactNode } from "react";
 import { Play } from "lucide-react";
 
-const DEMO_COMPONENTS: Record<
-  string,
-  () => Promise<{ default: React.ComponentType<Record<string, unknown>> }>
-> = {
-  MatchSlider: () => import("./demos/MatchSlider"),
-  CanvasScalerModes: () => import("./demos/CanvasScalerModes"),
-  AnchorsVisualizer: () => import("./demos/AnchorsVisualizer"),
-  Layout2048: () => import("./demos/Layout2048"),
-  FullLayout2048: () => import("./demos/FullLayout2048"),
+const DEMO_LAZY: Record<string, React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>> = {
+  MatchSlider: lazy(() =>
+    import("./demos/MatchSlider").catch((err) => {
+      console.error("[InteractiveDemo] Failed to load MatchSlider:", err);
+      throw err;
+    })
+  ),
+  CanvasScalerModes: lazy(() =>
+    import("./demos/CanvasScalerModes").catch((err) => {
+      console.error("[InteractiveDemo] Failed to load CanvasScalerModes:", err);
+      throw err;
+    })
+  ),
+  AnchorsVisualizer: lazy(() =>
+    import("./demos/AnchorsVisualizer").catch((err) => {
+      console.error("[InteractiveDemo] Failed to load AnchorsVisualizer:", err);
+      throw err;
+    })
+  ),
+  Layout2048: lazy(() =>
+    import("./demos/Layout2048").catch((err) => {
+      console.error("[InteractiveDemo] Failed to load Layout2048:", err);
+      throw err;
+    })
+  ),
+  FullLayout2048: lazy(() =>
+    import("./demos/FullLayout2048").catch((err) => {
+      console.error("[InteractiveDemo] Failed to load FullLayout2048:", err);
+      throw err;
+    })
+  ),
 };
 
 interface InteractiveDemoProps {
@@ -66,18 +88,16 @@ function DemoLoader({
   componentName: string;
   props: Record<string, unknown>;
 }) {
-  const loader = DEMO_COMPONENTS[componentName];
-  if (!loader) {
+  const LazyComponent = DEMO_LAZY[componentName];
+
+  if (!LazyComponent) {
     return (
-      <DemoErrorFallback message={`Демо «${componentName}» не найдено. Доступны: ${Object.keys(DEMO_COMPONENTS).join(", ")}.`} />
+      <DemoErrorFallback
+        message={`Демо «${componentName}» не найдено. Доступны: ${Object.keys(DEMO_LAZY).join(", ")}.`}
+      />
     );
   }
-  const LazyComponent = lazy(() => {
-    return loader().catch((err) => {
-      console.error(`[InteractiveDemo] Failed to load ${componentName}:`, err);
-      throw err;
-    });
-  });
+
   return <LazyComponent {...props} />;
 }
 
