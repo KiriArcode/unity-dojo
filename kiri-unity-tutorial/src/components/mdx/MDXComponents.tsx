@@ -69,28 +69,32 @@ const defaultWrappers: MDXComponents = {
   ),
   hr: () => <hr className="my-8 border-neutral-200 dark:border-neutral-700" />,
   table: ({ children }) => (
-    <div className="my-6 overflow-x-auto">
-      <table className="min-w-full border-collapse border border-neutral-300 dark:border-neutral-600">
+    <div className="my-6 overflow-x-auto rounded-lg border border-neutral-300 dark:border-neutral-600 shadow-sm">
+      <table className="min-w-full border-collapse">
         {children}
       </table>
     </div>
   ),
   thead: ({ children }) => (
-    <thead className="bg-neutral-100 dark:bg-neutral-800">{children}</thead>
+    <thead className="bg-neutral-200 dark:bg-neutral-700 border-b-2 border-neutral-300 dark:border-neutral-600">
+      {children}
+    </thead>
   ),
   tbody: ({ children }) => (
-    <tbody className="bg-white dark:bg-neutral-900">{children}</tbody>
+    <tbody className="bg-neutral-50 dark:bg-neutral-800/50">{children}</tbody>
   ),
   tr: ({ children }) => (
-    <tr className="border-b border-neutral-200 dark:border-neutral-700">{children}</tr>
+    <tr className="border-b border-neutral-200 dark:border-neutral-600 last:border-b-0">
+      {children}
+    </tr>
   ),
   th: ({ children }) => (
-    <th className="px-4 py-2 text-left font-semibold text-neutral-900 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-600">
+    <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-100 border-r border-neutral-300 dark:border-neutral-600 last:border-r-0">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="px-4 py-2 text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-600">
+    <td className="px-4 py-3 text-sm text-neutral-700 dark:text-neutral-300 border-r border-neutral-200 dark:border-neutral-600 last:border-r-0">
       {children}
     </td>
   ),
