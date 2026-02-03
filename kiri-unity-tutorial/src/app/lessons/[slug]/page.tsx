@@ -1,6 +1,7 @@
 import { getAllSlugs, getLessonBySlug } from "@/lib/lessons";
 import { notFound } from "next/navigation";
 import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
 import { LessonBody } from "./LessonBody";
 
 const LOG = process.env.NODE_ENV === "development";
@@ -38,6 +39,9 @@ export default async function LessonPage({
   try {
     mdxSource = await serialize(lesson.content, {
       parseFrontmatter: false,
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+      },
     });
     if (LOG) console.log("[LessonPage] serialize OK", lesson.slug);
   } catch (err) {
